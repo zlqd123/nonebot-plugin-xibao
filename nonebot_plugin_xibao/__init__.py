@@ -13,6 +13,8 @@ from PIL import Image, ImageDraw, ImageFont
 from pilmoji import Pilmoji
 from pilmoji.source import GoogleEmojiSource
 
+import string
+
 __plugin_meta__ = PluginMetadata(
     name="喜（悲）报生成器",
     description="生成喜报（或是悲报，管他呢）",
@@ -51,6 +53,32 @@ STROKE_WIDTH = 10
 # 在自动垂直居中的基础上再做一次整体偏移。
 # 正数整体下移，负数整体上移，可用于快速微调视觉中心。
 TEXT_VERTICAL_OFFSET_PX = -100
+
+# 需要跳过的标点符号（全角 + 半角）
+SKIP_PUNCTUATION = (
+    # 半角标点
+    string.punctuation +  # !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+    # 全角标点（中文常用）
+    "，。、；：！？"  # 全角逗号、句号、顿号、分号、冒号、感叹号、问号
+    "（）【】《》「」『』"  # 各类括号
+    "——……"  # 破折号、省略号
+    "～"  # 波浪号
+    "·"  # 间隔号
+)
+
+def strip_leading_punctuation(text: str) -> str:
+    """移除开头的标点符号（全角/半角），保留后面的内容"""
+    if not text:
+        return text
+    
+    # 去除开头空白
+    text = text.lstrip()
+    
+    # 循环移除开头的标点符号
+    while text and text[0] in SKIP_PUNCTUATION:
+        text = text[1:].lstrip()
+    
+    return text
 
 
 def _get_safe_rect(image_width: int, image_height: int) -> tuple[int, int, int, int]:
@@ -363,6 +391,7 @@ genxibao = on_command(
 @genxibao.handle()
 async def xibaohandle(args: Message = CommandArg()) -> None:
     textinput = args.extract_plain_text()
+    textinput = strip_leading_punctuation(textinput)
     picdata = await gen_xibao(text=textinput)
     await saa.Image(picdata).send()
 
@@ -379,5 +408,6 @@ genbeibao = on_command(
 @genbeibao.handle()
 async def beibaohandle(args: Message = CommandArg()) -> None:
     textinput = args.extract_plain_text()
+    textinput = strip_leading_punctuation(textinput)
     picdata = await gen_beibao(text=textinput)
     await saa.Image(picdata).send()
