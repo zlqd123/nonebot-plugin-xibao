@@ -56,14 +56,8 @@ TEXT_VERTICAL_OFFSET_PX = -100
 
 # 需要跳过的标点符号（全角 + 半角）
 SKIP_PUNCTUATION = (
-    # 半角标点
-    string.punctuation +  # !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
-    # 全角标点（中文常用）
+    string.punctuation +  # 半角!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
     "，。、；：！？"  # 全角逗号、句号、顿号、分号、冒号、感叹号、问号
-    "（）【】《》「」『』"  # 各类括号
-    "——……"  # 破折号、省略号
-    "～"  # 波浪号
-    "·"  # 间隔号
 )
 
 def strip_leading_punctuation(text: str) -> str:
